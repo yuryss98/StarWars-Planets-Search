@@ -10,6 +10,7 @@ function Provider({ children }) {
       name: '',
     },
   });
+  const [filterByNumericValues, setFilterByNumericValues] = useState([]);
 
   useEffect(() => {
     const requestApi = async () => {
@@ -40,6 +41,32 @@ function Provider({ children }) {
 
     setCopyData(planet);
   }, [filteredPlanet, data]);
+  // adsadsadasdasd
+
+  useEffect(() => {
+    if (filterByNumericValues.length) {
+      filterByNumericValues.forEach((filter) => {
+        const { column, comparison, value } = filter;
+
+        if (comparison === 'maior que') {
+          const planets = data.filter((planet) => Number(planet[column]) > Number(value));
+          setCopyData(planets);
+        }
+
+        if (comparison === 'menor que') {
+          const planets = data.filter((planet) => Number(planet[column]) < Number(value));
+          setCopyData(planets);
+        }
+
+        if (comparison === 'igual a') {
+          const planets = data.filter((planet) => (
+            Number(planet[column]) === Number(value)
+          ));
+          setCopyData(planets);
+        }
+      });
+    }
+  }, [filterByNumericValues, data]);
 
   const searchPlanetByName = ({ target }) => {
     const { value } = target;
@@ -53,9 +80,18 @@ function Provider({ children }) {
     }));
   };
 
+  const filterPlanetsByNumericValues = (obj) => {
+    setFilterByNumericValues((prevState) => {
+      const newArray = [...prevState, obj];
+
+      return newArray;
+    });
+  };
+
   const contextValue = {
     copyData,
     searchPlanetByName,
+    filterPlanetsByNumericValues,
   };
 
   return (
