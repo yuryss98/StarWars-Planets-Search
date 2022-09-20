@@ -4,6 +4,12 @@ import starWarsContext from './starWarsContext';
 
 function Provider({ children }) {
   const [data, setData] = useState([]);
+  const [copyData, setCopyData] = useState([]);
+  const [filteredPlanet, setFilteredPlanet] = useState({
+    filterByName: {
+      name: '',
+    },
+  });
 
   useEffect(() => {
     const requestApi = async () => {
@@ -22,8 +28,34 @@ function Provider({ children }) {
     requestApi();
   }, []);
 
+  useEffect(() => {
+    setCopyData(data);
+  }, [data]);
+
+  useEffect(() => {
+    const { filterByName } = filteredPlanet;
+    const { name } = filterByName;
+    const lowerCaseValue = name.toLowerCase();
+    const planet = data.filter((el) => el.name.toLowerCase().includes(lowerCaseValue));
+
+    setCopyData(planet);
+  }, [filteredPlanet, data]);
+
+  const searchPlanetByName = ({ target }) => {
+    const { value } = target;
+
+    setFilteredPlanet((prevState) => ({
+      ...prevState,
+      filterByName: {
+        ...prevState.filterByName,
+        name: value,
+      },
+    }));
+  };
+
   const contextValue = {
-    data,
+    copyData,
+    searchPlanetByName,
   };
 
   return (
