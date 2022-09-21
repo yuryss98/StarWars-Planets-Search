@@ -6,9 +6,14 @@ function SearchPlanet() {
     searchPlanetByName,
     filterPlanetsByNumericValues,
     columns,
+    filterByOptions,
+    filterRemoval,
+    setColumns,
+    setFilterByOptions,
   } = useContext(starWarsContext);
+
   const [filterByNumericValues, setFilterByNumericValues] = useState({
-    column: 'population',
+    column: columns[0],
     comparison: 'maior que',
     value: 0,
   });
@@ -32,9 +37,19 @@ function SearchPlanet() {
 
     filterPlanetsByNumericValues(newObj);
 
+    const newColumns = columns.filter((el) => el !== column);
+    setColumns(newColumns);
+
     setFilterByNumericValues((prevState) => ({
       ...prevState,
       column: columns.find((el) => el !== column),
+    }));
+  };
+
+  const removeAllFilters = () => {
+    setFilterByOptions((prevState) => ({
+      ...prevState,
+      filterByNumericValues: [],
     }));
   };
 
@@ -101,6 +116,30 @@ function SearchPlanet() {
       >
         Filtrar
       </button>
+
+      <button
+        type="button"
+        onClick={ removeAllFilters }
+        data-testid="button-remove-filters"
+      >
+        Remover Filtros
+      </button>
+
+      {
+        filterByOptions.filterByNumericValues.length
+        && filterByOptions.filterByNumericValues.map(({ column, comparison, value }) => (
+          <div key={ column } data-testid="filter">
+            {` ${column} ${comparison} ${value} `}
+
+            <button
+              type="button"
+              onClick={ () => filterRemoval(column) }
+            >
+              Excluir filtro
+            </button>
+          </div>
+        ))
+      }
 
     </form>
   );

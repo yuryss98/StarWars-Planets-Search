@@ -53,39 +53,35 @@ function Provider({ children }) {
   }, [filteredPlanet]);
 
   useEffect(() => {
-    if (filterByOptions.filterByNumericValues.length) {
-      filterByOptions.filterByNumericValues.forEach((filter) => {
-        const { column, comparison, value } = filter;
+    let newData = data;
+    filterByOptions.filterByNumericValues.forEach(({ comparison, column, value }) => {
+      if (comparison === 'maior que') {
+        const planets = newData.filter((planet) => (
+          Number(planet[column]) > Number(value)
+        ));
 
-        const newColumns = columns.filter((el) => el !== column);
-        setColumns(newColumns);
+        newData = planets;
+      }
 
-        if (comparison === 'maior que') {
-          const planets = copyData.filter((planet) => (
-            Number(planet[column]) > Number(value)
-          ));
+      if (comparison === 'menor que') {
+        const planets = newData.filter((planet) => (
+          Number(planet[column]) < Number(value)
+        ));
 
-          setCopyData(planets);
-        }
+        newData = planets;
+      }
 
-        if (comparison === 'menor que') {
-          const planets = copyData.filter((planet) => (
-            Number(planet[column]) < Number(value)
-          ));
+      if (comparison === 'igual a') {
+        const planets = newData.filter((planet) => (
+          Number(planet[column]) === Number(value)
+        ));
 
-          setCopyData(planets);
-        }
+        newData = planets;
+      }
+    });
 
-        if (comparison === 'igual a') {
-          const planets = copyData.filter((planet) => (
-            Number(planet[column]) === Number(value)
-          ));
-
-          setCopyData(planets);
-        }
-      });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    setCopyData(newData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterByOptions]);
 
   const searchPlanetByName = ({ target }) => {
@@ -107,11 +103,26 @@ function Provider({ children }) {
     }));
   };
 
+  const filterRemoval = (column) => {
+    setFilterByOptions((prevState) => ({
+      ...prevState,
+      filterByNumericValues: prevState.filterByNumericValues.filter(
+        (el) => el.column !== column,
+      ),
+    }));
+
+    setColumns((prevState) => [...prevState, column]);
+  };
+
   const contextValue = {
+    filterByOptions,
     columns,
     copyData,
+    setColumns,
+    filterRemoval,
     searchPlanetByName,
     filterPlanetsByNumericValues,
+    setFilterByOptions,
   };
 
   return (
