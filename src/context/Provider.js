@@ -40,8 +40,8 @@ function Provider({ children }) {
     const planet = data.filter((el) => el.name.toLowerCase().includes(lowerCaseValue));
 
     setCopyData(planet);
-  }, [filteredPlanet, data]);
-  // adsadsadasdasd
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filteredPlanet]);
 
   useEffect(() => {
     if (filterByNumericValues.length) {
@@ -49,24 +49,32 @@ function Provider({ children }) {
         const { column, comparison, value } = filter;
 
         if (comparison === 'maior que') {
-          const planets = data.filter((planet) => Number(planet[column]) > Number(value));
+          const planets = copyData.filter((planet) => (
+            Number(planet[column]) > Number(value)
+          ));
+
           setCopyData(planets);
         }
 
         if (comparison === 'menor que') {
-          const planets = data.filter((planet) => Number(planet[column]) < Number(value));
+          const planets = copyData.filter((planet) => (
+            Number(planet[column]) < Number(value)
+          ));
+
           setCopyData(planets);
         }
 
         if (comparison === 'igual a') {
-          const planets = data.filter((planet) => (
+          const planets = copyData.filter((planet) => (
             Number(planet[column]) === Number(value)
           ));
+
           setCopyData(planets);
         }
       });
     }
-  }, [filterByNumericValues, data]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterByNumericValues]);
 
   const searchPlanetByName = ({ target }) => {
     const { value } = target;
