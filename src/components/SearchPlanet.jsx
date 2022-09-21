@@ -5,6 +5,7 @@ function SearchPlanet() {
   const {
     searchPlanetByName,
     filterPlanetsByNumericValues,
+    columns,
   } = useContext(starWarsContext);
   const [filterByNumericValues, setFilterByNumericValues] = useState({
     column: 'population',
@@ -30,6 +31,11 @@ function SearchPlanet() {
     };
 
     filterPlanetsByNumericValues(newObj);
+
+    setFilterByNumericValues((prevState) => ({
+      ...prevState,
+      column: columns.find((el) => el !== column),
+    }));
   };
 
   return (
@@ -55,11 +61,11 @@ function SearchPlanet() {
           data-testid="column-filter"
           onChange={ handleChange }
         >
-          <option value="population">population</option>
-          <option value="orbital_period">orbital_period</option>
-          <option value="diameter">diameter</option>
-          <option value="rotation_period">rotation_period</option>
-          <option value="surface_water">surface_water</option>
+          {
+            columns.length && columns.map((el) => (
+              <option key={ el } value={ el }>{ el }</option>
+            ))
+          }
         </select>
       </div>
 

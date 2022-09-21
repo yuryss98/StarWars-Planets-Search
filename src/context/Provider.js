@@ -10,7 +10,16 @@ function Provider({ children }) {
       name: '',
     },
   });
-  const [filterByNumericValues, setFilterByNumericValues] = useState([]);
+  const [filterByOptions, setFilterByOptions] = useState({
+    filterByNumericValues: [],
+  });
+  const [columns, setColumns] = useState([
+    'population',
+    'orbital_period',
+    'diameter',
+    'rotation_period',
+    'surface_water',
+  ]);
 
   useEffect(() => {
     const requestApi = async () => {
@@ -44,9 +53,12 @@ function Provider({ children }) {
   }, [filteredPlanet]);
 
   useEffect(() => {
-    if (filterByNumericValues.length) {
-      filterByNumericValues.forEach((filter) => {
+    if (filterByOptions.filterByNumericValues.length) {
+      filterByOptions.filterByNumericValues.forEach((filter) => {
         const { column, comparison, value } = filter;
+
+        const newColumns = columns.filter((el) => el !== column);
+        setColumns(newColumns);
 
         if (comparison === 'maior que') {
           const planets = copyData.filter((planet) => (
@@ -74,7 +86,7 @@ function Provider({ children }) {
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterByNumericValues]);
+  }, [filterByOptions]);
 
   const searchPlanetByName = ({ target }) => {
     const { value } = target;
@@ -89,14 +101,14 @@ function Provider({ children }) {
   };
 
   const filterPlanetsByNumericValues = (obj) => {
-    setFilterByNumericValues((prevState) => {
-      const newArray = [...prevState, obj];
-
-      return newArray;
-    });
+    setFilterByOptions((prevState) => ({
+      ...prevState,
+      filterByNumericValues: [...prevState.filterByNumericValues, obj],
+    }));
   };
 
   const contextValue = {
+    columns,
     copyData,
     searchPlanetByName,
     filterPlanetsByNumericValues,
