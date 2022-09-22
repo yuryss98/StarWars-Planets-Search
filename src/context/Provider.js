@@ -46,7 +46,6 @@ function Provider({ children }) {
         delete el.residents;
         return el;
       });
-
       setData(newData);
     };
 
