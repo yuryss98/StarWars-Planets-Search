@@ -10,12 +10,19 @@ function SearchPlanet() {
     filterRemoval,
     setColumns,
     setFilterByOptions,
+    ordenationColumns,
+    submitOrdenation,
   } = useContext(starWarsContext);
 
   const [filterByNumericValues, setFilterByNumericValues] = useState({
     column: columns[0],
     comparison: 'maior que',
     value: 0,
+  });
+
+  const [definedOrder, setDefinedOrder] = useState({
+    column: ordenationColumns[0],
+    sort: 'ASC',
   });
 
   const handleChange = ({ target }) => {
@@ -50,6 +57,15 @@ function SearchPlanet() {
     setFilterByOptions((prevState) => ({
       ...prevState,
       filterByNumericValues: [],
+    }));
+  };
+
+  const handleOrdenation = ({ target }) => {
+    const { name, value } = target;
+
+    setDefinedOrder((prevState) => ({
+      ...prevState,
+      [name]: value,
     }));
   };
 
@@ -124,6 +140,54 @@ function SearchPlanet() {
       >
         Remover Filtros
       </button>
+
+      <div>
+        <p>Ordenar</p>
+        <select
+          name="column"
+          id=""
+          data-testid="column-sort"
+          onChange={ handleOrdenation }
+        >
+          {
+            ordenationColumns.map((order) => (
+              <option key={ order } value={ order }>{ order }</option>
+            ))
+          }
+        </select>
+
+        <label htmlFor="Ascendente">
+          Ascendente
+          <input
+            type="radio"
+            name="sort"
+            id="Ascendente"
+            data-testid="column-sort-input-asc"
+            onChange={ handleOrdenation }
+            value="ASC"
+          />
+        </label>
+
+        <label htmlFor="Descendente">
+          Descendente
+          <input
+            type="radio"
+            name="sort"
+            id="Descendente"
+            data-testid="column-sort-input-desc"
+            onChange={ handleOrdenation }
+            value="DESC"
+          />
+        </label>
+
+        <button
+          type="button"
+          data-testid="column-sort-button"
+          onClick={ () => submitOrdenation(definedOrder) }
+        >
+          Ordenar
+        </button>
+      </div>
 
       {
         filterByOptions.filterByNumericValues.length

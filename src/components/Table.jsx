@@ -29,7 +29,7 @@ function Table() {
           {
             copyData.length && copyData.map((el) => (
               <tr key={ el.name }>
-                <td>
+                <td data-testid="planet-name">
                   { el.name }
                 </td>
                 <td>

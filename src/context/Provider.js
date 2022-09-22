@@ -21,6 +21,21 @@ function Provider({ children }) {
     'surface_water',
   ]);
 
+  const ordenationColumns = [
+    'population',
+    'orbital_period',
+    'diameter',
+    'rotation_period',
+    'surface_water',
+  ];
+
+  const [definedOrder, setOrderSelected] = useState({
+    order: {
+      column: ordenationColumns[0],
+      sort: 'ASC',
+    },
+  });
+
   useEffect(() => {
     const requestApi = async () => {
       const endpoint = 'https://swapi.dev/api/planets';
@@ -84,6 +99,48 @@ function Provider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterByOptions]);
 
+  useEffect(() => {
+    let arrayToSorted = [...copyData];
+
+    if (definedOrder.order.sort === 'ASC') {
+      const removedUnknown = arrayToSorted.filter((planet) => (
+        planet[definedOrder.order.column] !== 'unknown'
+      ));
+
+      const sortedArray = removedUnknown.sort((a, b) => (
+        Number(a[definedOrder.order.column]) - Number(b[definedOrder.order.column])
+      ));
+
+      const lookingForUnknown = arrayToSorted.filter((planet) => (
+        planet[definedOrder.order.column] === 'unknown'
+      ));
+
+      sortedArray.push(...lookingForUnknown);
+
+      arrayToSorted = sortedArray;
+    } else {
+      const removedUnknown = arrayToSorted.filter((planet) => (
+        planet[definedOrder.order.column] !== 'unknown'
+      ));
+
+      const sortedArray = removedUnknown.sort((a, b) => (
+        Number(b[definedOrder.order.column]) - Number(a[definedOrder.order.column])
+      ));
+
+      const lookingForUnknown = arrayToSorted.filter((planet) => (
+        planet[definedOrder.order.column] === 'unknown'
+      ));
+
+      sortedArray.push(...lookingForUnknown);
+
+      arrayToSorted = sortedArray;
+    }
+
+    setCopyData(arrayToSorted);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [definedOrder]);
+
   const searchPlanetByName = ({ target }) => {
     const { value } = target;
 
@@ -114,11 +171,20 @@ function Provider({ children }) {
     setColumns((prevState) => [...prevState, column]);
   };
 
+  const submitOrdenation = (obj) => {
+    setOrderSelected((prevState) => ({
+      ...prevState,
+      order: obj,
+    }));
+  };
+
   const contextValue = {
     filterByOptions,
     columns,
     copyData,
+    ordenationColumns,
     setColumns,
+    submitOrdenation,
     filterRemoval,
     searchPlanetByName,
     filterPlanetsByNumericValues,
