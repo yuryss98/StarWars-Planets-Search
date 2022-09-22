@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { getByText, render, screen, waitFor } from '@testing-library/react';
 import App from '../App';
 import mockData from './mock';
 import userEvent from '@testing-library/user-event';
@@ -12,8 +12,6 @@ describe('testando o componente App', () => {
 
     render(<App />);
   });
-
-  
 
   it('verifica se os inputs estão na tela e se o fetch foi chamado', () => {
     expect(fetch).toHaveBeenCalledTimes(1);
@@ -51,47 +49,24 @@ describe('testando o componente App', () => {
   });
 
   it('verificando se os planetas estão na tela, e se filtrar "Tatooine" os demais planetas nao aparecem mais', async () => {
-    const tatooinePlanet = await screen.findByText('Tatooine');
-    const alderaanPlanet = screen.queryByText('Alderaan');
-    const yavinIvPlanet = screen.queryByText('Yavin IV')
-    const hothPlanet = screen.queryByText('Hoth')
-    const dagobahPlanet = screen.queryByText('Dagobah')
-    const bespinPlanet = screen.queryByText('Bespin')
-    const endorPlanet = screen.queryByText('Endor')
-    const nabooPlanet = screen.queryByText('Naboo')
-    const coruscantPlanet = screen.queryByText('Coruscant')
-    const kaminoPlanet = screen.queryByText('Kamino')
-    
-    expect(tatooinePlanet).toBeInTheDocument();
-    expect(alderaanPlanet).toBeInTheDocument();
-    expect(yavinIvPlanet).toBeInTheDocument();
-    expect(hothPlanet).toBeInTheDocument();
-    expect(dagobahPlanet).toBeInTheDocument();
-    expect(bespinPlanet).toBeInTheDocument();
-    expect(endorPlanet).toBeInTheDocument();
-    expect(nabooPlanet).toBeInTheDocument();
-    expect(coruscantPlanet).toBeInTheDocument();
-    expect(kaminoPlanet).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText('Tatooine')).toBeInTheDocument();
+    });
+
+    mockData.results.forEach(({ name }) => {
+      expect(screen.getByText(name)).toBeInTheDocument();
+    })
 
     const searchPlanetByName = screen.getByTestId('name-filter');
 
     userEvent.type(searchPlanetByName, 'tatooine');
 
-    expect(searchPlanetByName.value).toBe('tatooine')
-
-    expect(tatooinePlanet).toBeInTheDocument();
-    expect(alderaanPlanet).not.toBeInTheDocument();
-    expect(yavinIvPlanet).not.toBeInTheDocument();
-    expect(hothPlanet).not.toBeInTheDocument();
-    expect(dagobahPlanet).not.toBeInTheDocument();
-    expect(bespinPlanet).not.toBeInTheDocument();
-    expect(endorPlanet).not.toBeInTheDocument();
-    expect(nabooPlanet).not.toBeInTheDocument();
-    expect(coruscantPlanet).not.toBeInTheDocument();
-    expect(kaminoPlanet).not.toBeInTheDocument();
+    const planets = screen.getAllByTestId('planet-name');
+    expect(planets).toHaveLength(1);
   });
 
-  it('testando filtro de igual a', async () => {
+  it('testando filtro de "igual a"', async () => {
     const selectColunsFilter = screen.getByTestId('column-filter');
     const selectComparisonFilter = screen.getByTestId('comparison-filter');
     const inputValueFilter = screen.getByTestId('value-filter');
@@ -102,19 +77,13 @@ describe('testando o componente App', () => {
 
     userEvent.clear(inputValueFilter);
     userEvent.type(inputValueFilter, '12');
-    expect(inputValueFilter.value).toBe('12');
     userEvent.click(btnFilter);
 
-    const bespinPlanet = await screen.findByText('Bespin')
-    const dagobahPlanet = screen.queryByText('Dagobah')
-
-    expect(bespinPlanet).toBeInTheDocument();
-    expect(dagobahPlanet).not.toBeInTheDocument();
-
-
+    const planets = screen.getAllByTestId('planet-name');
+    expect(planets).toHaveLength(1);
   })
 
-  it('testando os filtros pelos select filtros, e testando o btn de remover todos os filtros', async () => {
+  it('testando filtro de "menor que", e o botão de remover todos os filtros', () => {
     const selectColunsFilter = screen.getByTestId('column-filter');
     const selectComparisonFilter = screen.getByTestId('comparison-filter');
     const inputValueFilter = screen.getByTestId('value-filter');
@@ -122,36 +91,23 @@ describe('testando o componente App', () => {
 
     userEvent.selectOptions(selectColunsFilter, 'diameter')
     userEvent.selectOptions(selectComparisonFilter, 'menor que')
-    expect(screen.getByText('menor que').selected).toBe(true);
 
     userEvent.clear(inputValueFilter);
     userEvent.type(inputValueFilter, '7200');
-    expect(inputValueFilter.value).toBe('7200');
-
     userEvent.click(btnFilter);
 
+    const planets = screen.getAllByTestId('planet-name');
+    expect(planets).toHaveLength(1);
 
-    const endorPlanet = await screen.findByText('Endor')
-    const yavinIvPlanet = screen.queryByText('Yavin IV')
-    const hothPlanet = screen.queryByText('Hoth')
+    const btnRemoveAllFilters = screen.getByTestId('button-remove-filters');
 
-    expect(endorPlanet).toBeInTheDocument();
-    expect(yavinIvPlanet).not.toBeInTheDocument();
-    expect(hothPlanet).not.toBeInTheDocument();
+    userEvent.click(btnRemoveAllFilters);
 
-    const btnRemoveFilters = screen.getByTestId('button-remove-filters');
-
-    userEvent.click(btnRemoveFilters);
-
-    const yavinIvPlanet2 = await screen.findByText('Yavin IV')
-    const hothPlanet2 = screen.queryByText('Hoth')
-
-    expect(yavinIvPlanet2).toBeInTheDocument();
-    expect(hothPlanet2).toBeInTheDocument();
-
+    const planets2 = screen.getAllByTestId('planet-name');
+    expect(planets2).toHaveLength(10);
   });
 
-  it('testando os botões de remover cada um dos filtros ', async () => {
+  it('testando filtro de maior que, e o botão de remover filtro individual', () => {
     const selectColunsFilter = screen.getByTestId('column-filter');
     const selectComparisonFilter = screen.getByTestId('comparison-filter');
     const inputValueFilter = screen.getByTestId('value-filter');
@@ -159,23 +115,14 @@ describe('testando o componente App', () => {
 
     userEvent.selectOptions(selectColunsFilter, 'population')
     userEvent.selectOptions(selectComparisonFilter, 'maior que')
-    expect(screen.getByText('maior que').selected).toBe(true);
 
     userEvent.clear(inputValueFilter);
     userEvent.type(inputValueFilter, '2000000000');
-    expect(inputValueFilter.value).toBe('2000000000');
 
     userEvent.click(btnFilter);
 
-    const nabooPlanet = await screen.findByText('Naboo');
-    const coruscantPlanet = screen.getByText('Coruscant');
-    const bespinPlanet = screen.queryByText('Bespin');
-    const kaminoPlanet = screen.queryByText('Kamino');
-
-    expect(nabooPlanet).toBeInTheDocument();
-    expect(coruscantPlanet).toBeInTheDocument();
-    expect(bespinPlanet).not.toBeInTheDocument();
-    expect(kaminoPlanet).not.toBeInTheDocument();
+    const planets = screen.getAllByTestId('planet-name');
+    expect(planets).toHaveLength(2);
 
     const filtersSelected = screen.getByText('population maior que 2000000000')
     expect(filtersSelected).toBeInTheDocument();
@@ -185,12 +132,8 @@ describe('testando o componente App', () => {
 
     userEvent.click(btnDeleteFilter);
 
-    const bespinPlanet2 = await screen.findByText('Bespin');
-    const kaminoPlanet2 = screen.queryByText('Kamino');
-
-    expect(bespinPlanet2).toBeInTheDocument();
-    expect(kaminoPlanet2).toBeInTheDocument();
-
+    const planets2 = screen.getAllByTestId('planet-name');
+    expect(planets2).toHaveLength(10);
   });
 
   it('testando o botão de ordenar ASC', () => {
